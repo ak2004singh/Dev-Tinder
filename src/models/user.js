@@ -28,6 +28,13 @@ const userSchema = new mongoose.Schema({
         unique:true,
         trim:true,
         validate(value){
+            if(value.size()>254)
+            {
+                throw new Error("Email is too long");
+            }
+        }
+        ,
+        validate(value){
             if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(value)) {
                 throw new Error("Email is not valid");}
         }
@@ -58,7 +65,7 @@ const userSchema = new mongoose.Schema({
         type:Number,
         required:true,
         min:4,
-        max:100
+        max:110
     },
     phone:{
         type:String,
@@ -85,16 +92,28 @@ const userSchema = new mongoose.Schema({
             if (!value.every((skill) => /^[A-Za-z0-9+]+$/.test(skill))) {
               throw new Error("Skills can only contain letters, numbers, and '+'");
             }
-          }
+          },
+        validate(value){
+            if(value.length < 1 || value.length > 10){
+                throw new Error("Skills should be between 1 to 10")
+            }
+        }
     },
     location:{
         type:String,
         required:true,
         trim:true
+        ,
+        validate(value){
+            if(!value.match(/^[A-Za-z\s.\-']{1,100}$/)){
+                throw new Error("Location should only contain alphabets and numbers")
+            }
+        }
     },
     project1:{
         type:String,
-        trim:true
+        trim:true,
+        maxlength:100,
     }
 },{timestamps:true});
 module.exports = mongoose.model("User",userSchema);

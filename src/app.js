@@ -32,23 +32,33 @@ app.post("/signup",async (req,res)=>{
         console.log(err);
     }
 });
-app.patch("/user",async(req,res)=>{
+app.patch("/user/:userId",async(req,res)=>{
     const updatData = req.body;
-    const userId = req.body._id;
+    const userId = req.params?.userId;
     try{
-        const updatedUser = await User.findByIdAndUpdate(userId,updatData,{
-            new:true,
-            runValidators:true
-        });
-        if(!updatedUser)
+        const changableData = ["password","gender","age","phone","bio","skills","location","project1","image"];
+        const isValidOperation = Object.keys(updatData).every((key)=>changableData.includes(key));
+        if(isValidOperation)
         {
-            res.status(404).send("User not found");
-            console.log("User not found");
+            const updatedUser = await User.findByIdAndUpdate(userId,updatData,{
+                new:true,
+                runValidators:true
+            });
+            if(!updatedUser)
+            {
+                res.status(404).send("User not found");
+                console.log("User not found");
+            }
+            else 
+            {
+                res.send("User  Data updated successfully");
+                console.log("User data updated successfully",updatedUser);
+            }
         }
         else 
         {
-            res.send("User  Data updated successfully");
-            console.log("User data updated successfully",updatedUser);
+            res.status(400).send("Invalid update operation");
+            console.log("Invalid update operation");
         }
     }
     catch(err){
