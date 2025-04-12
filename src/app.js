@@ -1,78 +1,99 @@
 const express = require("express");
 const {connectDB} = require("./config/database");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 const User = require("./models/user");
+const {auth} = require("./ak/auth");
 const app = express();
 app.use(express.json());
-app.get("/user",async(req,res)=>{
+app.use(cookieParser());
+app.get("/user/signin",async(req,res)=>{
     try{
-        const user = await User.find({email:req.body.email,password:req.body.password});
-        if(user.length === 0){
-            res.status(404).send("User not found");
-            console.log("User not found");
+        const plainTextPassword = req.body.password;
+        const user = await User.findOne({email:req.body.email});
+        if(!user)
+        {
+            throw new Error("Invalid credentials");
         }
-        else 
-        {res.send(user);
-        console.log("User fetched successfully");}
+        const isValid = await bcrypt.compare(plainTextPassword,user.password);
+        if(!isValid)
+        {
+            throw new Error("Invalid credentials");
+        }
+        const token = jwt.sign({ id: user._id }, "Aditya",{expiresIn:"1h"});
+        res.cookie("token",token,{httpOnly:true});
+        res.send("User signed in successfully");
+        console.log("User signed in successfully");
     }
     catch(err){
-        res.status(404).send("Error in fetching users");
-        console.log(err);
+        res.status(404).send("Error in fetching users : Invalid credentials \n Please enter valid credentials \n ");
+        console.log(err.message);
     }
 });
-app.post("/signup",async (req,res)=>{
+app.post("/user/signup",async (req,res)=>{
    
     try{
+        const email = req.body.email;
+        const duplicate = await User.findOne({email});
+        if(duplicate)
+        {
+            throw new Error("Email already exists");
+        }
         const user = new User(req.body);
+        const password = user.password;
+        const passwordHash = await bcrypt.hash(password,10);
+        user.password  = passwordHash;
         await user.save();
         res.send("Congratulations! You have signed up successfully");
         console.log("User signed up successfully");
     }
     catch(err){
-        res.status(400).send("Error in signing up user");
-        console.log(err);
+        res.status(404).send("Error in signing up user \n Please enter valid credentials \n ");
+        console.log(err.message);
     }
 });
-app.patch("/user/:userId",async(req,res)=>{
+app.patch("/user/update",auth,async(req,res)=>{
     const updatData = req.body;
-    const userId = req.params?.userId;
+    const userId = req.userId;
     try{
         const changableData = ["password","gender","age","phone","bio","skills","location","project1","image"];
         const isValidOperation = Object.keys(updatData).every((key)=>changableData.includes(key));
         if(isValidOperation)
         {
+            if(updatData.password)
+            {
+                const password = updatData.password;
+                const passwordHash = await bcrypt.hash(password,10);
+                updatData.password  = passwordHash;
+            }
             const updatedUser = await User.findByIdAndUpdate(userId,updatData,{
                 new:true,
                 runValidators:true
             });
             if(!updatedUser)
             {
-                res.status(404).send("User not found");
-                console.log("User not found");
+                throw new Error("User not found");
             }
-            else 
-            {
-                res.send("User  Data updated successfully");
-                console.log("User data updated successfully",updatedUser);
-            }
+            res.send("User  Data updated successfully");
+            console.log("User data updated successfully",updatedUser);
+            
         }
-        else 
-        {
-            res.status(400).send("Invalid update operation");
-            console.log("Invalid update operation");
-        }
+        throw new Error("Invalid update data");
     }
     catch(err){
-        res.status(400).send("Error in updating user data");
+        res.status(404).send("Error in updating user data");
         console.log(err);
     }
 });
-app.delete("/user",async(req,res)=>{
-    const userId = req.body._id;
+app.delete("/user/delete",auth,async(req,res)=>{
+    const userId = req.userId;
+    console.log(userId);
+    console.log("User ID",userId);
     try{
         const deletedUser = await User.findByIdAndDelete(userId);
         if(!deletedUser){
-            res.status(404).send("User not found");
-            console.log("User not found");
+            throw new Error("User not found");
         }
         else 
         {
@@ -82,7 +103,7 @@ app.delete("/user",async(req,res)=>{
         
     }
     catch(err){
-        res.status(400).send("Error in deleting user data");
+        res.status(400).send("Error in deleting user data"+err.message);
         console.log(err);
     }
 });

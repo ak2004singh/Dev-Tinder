@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 const userSchema = new mongoose.Schema({
+   
     firstName:{
         type:String,
         required:true,
@@ -28,28 +30,18 @@ const userSchema = new mongoose.Schema({
         unique:true,
         trim:true,
         validate(value){
-            if(value.size()>254)
-            {
-                throw new Error("Email is too long");
+            if(!validator.isEmail(value)){
+                throw new Error("Email is not valid")
             }
-        }
-        ,
-        validate(value){
-            if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(value)) {
-                throw new Error("Email is not valid");}
         }
     },
     password:{
         type:String,
         required:true,
         trim:true,
-        minLength:6,maxlength:20,
-        validate(value){
-            if(!value.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,20}$/)){
-                throw new Error("Password should contain at least one uppercase letter, one lowercase letter, one number, and be between 6 to 20 characters long");
-            }
+        minLength:6,maxlength:100
         }
-    },
+    ,
     gender:{
         type:String,
         required:true,
@@ -84,6 +76,11 @@ const userSchema = new mongoose.Schema({
         type:String,
         default:"https://www.hindustantimes.com/ht-img/img/2025/03/26/550x309/IMG_9850_1743016356335_1743016432763.jpeg",
         trim:true
+        ,validate(value){
+            if(!validator.isURL(value)){
+                throw new Error("Image URL is not valid");
+            }
+        }
     },
     skills:{
         type:[String],
@@ -99,17 +96,16 @@ const userSchema = new mongoose.Schema({
             }
         }
     },
-    location:{
-        type:String,
-        required:true,
-        trim:true
-        ,
-        validate(value){
-            if(!value.match(/^[A-Za-z\s.\-']{1,100}$/)){
-                throw new Error("Location should only contain alphabets and numbers")
+    location: {
+        type: String,
+        trim: true,
+        validate(value) {
+            if (!value.match(/^[A-Za-z0-9\s.,#\-'/\\]{1,100}$/)) {
+                throw new Error("Location should be a valid address (alphanumeric, spaces, ., #, -, /, etc.)");
             }
         }
-    },
+    }
+    ,
     project1:{
         type:String,
         trim:true,
