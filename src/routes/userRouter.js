@@ -1,6 +1,6 @@
 const express = require("express");
 const userRouter = express.Router();
-const { User } = require("../models/user");
+const  User  = require("../models/user");
 const {auth}=require("../helper/auth");
 const connectionRequest = require("../models/connectionRequest");
 const populateData = "firstName lastName gender age phone bio image skills ";
@@ -55,4 +55,31 @@ userRouter.get("/user/connections",auth,async(req,res)=>{
     }
 });
 
+
+userRouter.get("/user/feed",auth,async(req,res)=>{
+    try{
+        const userId = req.userId;
+        const page = req.query.page|| 1;
+        const limit = req.query.limit || 10;
+        const skip = (page-1)*limit;
+        const seen = await connectionRequest.find({
+            $or:[{senderId:userId},{receiverId:userId}]
+        });
+        let ak = new Set();
+        ak.add(userId.toString());
+        seen.forEach((val)=>{
+            ak.add(val.senderId.toString());
+            ak.add(val.receiverId.toString());
+        });
+        const allUsers = await User.find({_id:{$nin:Array.from(ak)}}).select(populateData).skip(skip).limit(limit);
+        res.json({
+        message:"All Users",
+        users:allUsers
+        });
+        }
+        catch(err)
+        {
+        res.status(404).json({message:"Error in loading feed \n "+err.message});
+        }
+});
 module.exports = userRouter;
