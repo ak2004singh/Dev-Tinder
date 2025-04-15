@@ -10,7 +10,7 @@ const auth = async function(req,res,next){
         next();
     }
     catch(err){
-        res.status(401).send("Unauthorized access \n Please login again \n ");
+        res.status(401).send("Unauthorized access \n Please login again \n "+err.message);
         console.log(err.message);
     }
 }
