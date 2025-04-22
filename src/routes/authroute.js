@@ -42,7 +42,22 @@ authRouter.post("/signin",async(req,res)=>{
             }
             const token = jwt.sign({ id: user._id }, "Aditya",{expiresIn:"1h"});
             res.cookie("token",token,{httpOnly:true});
-            res.send("User signed in successfully");
+            res.json({
+                message:"User signed in successfully",
+                data:{
+                    user:{
+                        id:user._id,
+                        name:user.firstName + " " + user.lastName,
+                        email:user.email,
+                        age:user.age,
+                        phone:user.phone,
+                        Image:user.image,
+                        bio:user.bio,   
+                        project:user.project1,
+                        location:user.location
+
+                    }}
+            });
             console.log("User signed in successfully");
         }
         catch(err){
