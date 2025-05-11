@@ -3,7 +3,7 @@ const auth = async function(req,res,next){
     try{
         const token = req.cookies.token;
         if(!token){
-            throw new Error("Token not found");
+return res.status(401).send("Unauthorized access \n Please login again \n ");
         }
         const decoded = jwt.verify(token,"Aditya");
         req.userId = decoded.id;
