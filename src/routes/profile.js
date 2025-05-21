@@ -9,7 +9,7 @@ profileRouter.patch("/profile/edit",auth,async(req,res)=>{
     const updatData = req.body;
     const userId = req.userId;
     try{
-        const changableData = ["gender","age","phone","bio","skills","location","project1","image"];
+        const changableData = ["firstName","lastName","gender","age","phone","bio","skills","location","project1","image"];
         const isValidOperation = Object.keys(updatData).every((key)=>changableData.includes(key));
         if(isValidOperation)
         {

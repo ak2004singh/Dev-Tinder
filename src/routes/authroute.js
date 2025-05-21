@@ -26,14 +26,14 @@ authRouter.post("/signup", async(req,res)=>{
         console.log(err.message);
     }
 });
-//   Sign in route
+//   Sign in route 
 authRouter.post("/signin",async(req,res)=>{
     try{
             const plainTextPassword = req.body.password;
             const user = await User.findOne({email:req.body.email});
             if(!user)
             {
-                throw new Error("Invalid credentials");
+                    throw new Error("Invalid credentials");
             }
             const isValid = await bcrypt.compare(plainTextPassword,user.password);
             if(!isValid)
@@ -44,24 +44,12 @@ authRouter.post("/signin",async(req,res)=>{
             res.cookie("token",token,{httpOnly:true});
             res.json({
                 message:"User signed in successfully",
-                data:{
-                    user:{
-                        id:user._id,
-                        name:user.firstName + " " + user.lastName,
-                        email:user.email,
-                        age:user.age,
-                        phone:user.phone,
-                        Image:user.image,
-                        bio:user.bio,   
-                        project:user.project1,
-                        location:user.location
-
-                    }}
+                user:user
             });
             console.log("User signed in successfully");
         }
         catch(err){
-            res.status(404).send("Error in fetching users : Invalid credentials \n Please enter valid credentials \n ");
+            res.status(404).send("Invalid credentials ");
             console.log(err.message);
         }
 });
@@ -80,4 +68,4 @@ authRouter.post("/logout",async(req,res)=>{
 });
 
 
-module.exports = authRouter;
+module.exports = authRouter;                                      

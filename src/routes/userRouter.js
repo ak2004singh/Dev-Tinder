@@ -3,7 +3,7 @@ const userRouter = express.Router();
 const  User  = require("../models/user");
 const {auth}=require("../helper/auth");
 const connectionRequest = require("../models/connectionRequest");
-const populateData = "firstName lastName gender age phone bio image skills ";
+const populateData = "firstName lastName gender age phone bio image skills location ";
 userRouter.get("/user/requests/received",auth,async(req,res)=>{
     try{
         const userId = req.userId;
