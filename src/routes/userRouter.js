@@ -12,7 +12,9 @@ userRouter.get("/user/requests/received",auth,async(req,res)=>{
         }).populate("senderId",populateData);
         if(requests.length === 0)
         {
-            return res.status(200).json({message:"No requests received"});
+            return res.status(200).json({message:"No requests received",
+                requests:[]
+            });
         }
         const requestsData = requests.map((data)=>{
             return data.senderId;

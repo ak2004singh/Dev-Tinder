@@ -40,6 +40,7 @@ requestRouter.post("/request/send/:status/:userId",auth,async(req,res)=>{
     }
     catch(err){
         res.status(404).send("Error in sending connection request \n "+err.message);
+        console.log(err);
         console.log(err.message);
     }
 });

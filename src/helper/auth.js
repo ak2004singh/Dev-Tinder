@@ -5,7 +5,7 @@ const auth = async function(req,res,next){
         if(!token){
 return res.status(401).send("Unauthorized access \n Please login again \n ");
         }
-        const decoded = jwt.verify(token,"Aditya");
+        const decoded = jwt.verify(token,process.env.JWT_SECREAT);
         req.userId = decoded.id;
         next();
     }

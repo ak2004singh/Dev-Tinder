@@ -40,7 +40,7 @@ authRouter.post("/signin",async(req,res)=>{
             {
                 throw new Error("Invalid credentials");
             }
-            const token = jwt.sign({ id: user._id }, "Aditya",{expiresIn:"1h"});
+            const token = jwt.sign({ id: user._id }, process.env.JWT_SECREAT,{expiresIn:"1h"});
             res.cookie("token",token,{httpOnly:true});
             res.json({
                 message:"User signed in successfully",
