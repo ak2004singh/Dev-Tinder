@@ -7,7 +7,7 @@ const authRouter = require("./routes/authroute");
 const profileRouter = require("./routes/profile");
 const requestRouter = require("./routes/request");
 const userRouter = require("./routes/userRouter");
-
+const http = require("http");
 const app = express();
 app.use(cors(
     {
@@ -15,6 +15,8 @@ app.use(cors(
         credentials:true,
     }
 ));
+const server = http.createServer(app);
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(authRouter);
@@ -24,7 +26,7 @@ app.use(userRouter);
 connectDB().
 then(()=>{
     console.log("Connected to DB");
-    app.listen(3000);
+    server.listen(3000);
 })
 .catch((err)=>{
     console.log(err);
