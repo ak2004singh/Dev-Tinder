@@ -8,15 +8,16 @@ const profileRouter = require("./routes/profile");
 const requestRouter = require("./routes/request");
 const userRouter = require("./routes/userRouter");
 const http = require("http");
+const initializeSocket = require("./helper/socket");
 const app = express();
+const server = http.createServer(app);
+initializeSocket(server);
 app.use(cors(
     {
         origin :"http://localhost:5173",
         credentials:true,
     }
 ));
-const server = http.createServer(app);
-
 app.use(express.json());
 app.use(cookieParser());
 app.use(authRouter);
